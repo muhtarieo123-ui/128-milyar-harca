@@ -18,21 +18,30 @@
 
         const INITIAL_BUDGET = 128000000000;
 
-        const ITEMS = [
+       const ITEMS = [
             { id: 'simit', name: 'Simit', price: 1, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=60' },
-            { id: 'cay', name: 'Çay', price: 1, img: 'https://images.unsplash.com/photo-1576092768241-dee231879e63?auto=format&fit=crop&w=500&q=60' },
-            { id: 'netflix', name: 'Netflix Aboneliği (1 Yıl)', price: 120, img: 'https://images.unsplash.com/photo-1522869635100-9f4c3e86aa37?auto=format&fit=crop&w=500&q=60' },
+            { id: 'cay', name: 'Çay', price: 1, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=60' },
+            { id: 'netflix', name: 'Netflix Aboneliği (1 Yıl)', price: 120, img: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=500&q=60' },
             { id: 'ayakkabi', name: 'Lüks Spor Ayakkabı', price: 250, img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=60' },
             { id: 'telefon', name: 'Son Model Akıllı Telefon', price: 1500, img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=60' },
-            { id: 'rolex', name: 'Rolex Saat', price: 15000, img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=60' },
-            { id: 'motorsiklet', name: 'Motosiklet', price: 240000, img: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=500&q=60' },
-            { id: 'togg', name: 'TOGG', price: 600000, img: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=500&q=60' },
+            { id: 'bilgisayar', name: 'Üst Düzey Oyun Bilgisayarı', price: 4000, img: 'https://www.evimitasarla.net/ev-dekorasyon-fikirleri-blog/wp-content/uploads/2023/12/image-5.png' },
+            { id: 'rolex', name: 'Rolex Saat', price: 15000, img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=500&q=60' },
+            { id: 'togg', name: 'TOGG', price: 60000, img: 'https://cdn.motor1.com/images/mgl/kolmBN/s1/togg-t10x-yeni-renk-secenegi.webp' },
+            { id: 'zırhlı', name: 'Mercedes-Maybach S-Serisi', price: 240000, img: 'https://cdn.motor1.com/images/mgl/WLAV3/s1/2019-mercedes-maybach-s-class-sedan.webp' },
             { id: 'rezidans', name: 'Boğaz Manzaralı Rezidans', price: 2500000, img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=500&q=60' },
-            { id: 'helikopter', name: 'Özel Helikopter', price: 50000000, img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=500&q=60' },
-            { id: 'jet', name: 'Özel Jet', price: 650000000, img: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=500&q=60' },
-            { id: 'futbol', name: 'Büyük Futbol Kulübü', price: 2000000000, img: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=500&q=60' },
-            { id: 'tupraş', name: 'Tüpraş', price: 75000000000, img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=60' }
+            { id: 'helikopter', name: 'Özel Helikopter', price: 5000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVy3pIpXG61pTYXOgSg9YF82095MlR_hWoiH1lEfigvNRNQ5zoFuOM90s&s=10' },
+            { id: 'yat', name: 'Mega Lüks Yat', price: 25000000, img: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=500&q=60' },
+            { id: 'jet', name: 'Özel Jet', price: 65000000, img: 'https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=500&q=60' },
+            { id: 'fotuzbes', name: 'F-35', price: 100000000, img: 'https://www.savunmatr.com/wp-content/uploads/2024/07/F35-LMA-800.jpg' },
+            { id: 'yolcuucagi', name: 'Yolcu Uçağı', price: 350000000, img: 'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=500&q=60' },
+            { id: 'Gökdelen', name: 'Gökdelen', price: 1000000000, img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=500&q=60' },
+            { id: 'saray', name: 'Devlet Sarayı', price: 1500000000, img: 'https://static.bianet.org/system/uploads/1/articles/spot_image/000/229/576/original/1574323238212-kulliye.jpg' },
+            { id: 'futbol', name: 'Büyük Futbol Kulübü', price: 2000000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2FuPhJ34emDBkwveM-aRqaFJB9n8IRHs0pW96urGZcDCsUdt617CCAgI&s=10' },
+            { id: 'tupras', name: 'Tüpraş', price: 7500000000, img: 'https://upload.wikimedia.org/wikipedia/commons/1/12/Tupras_%C4%B0zmit_Refinery.jpg?utm_source=tr.wikipedia.org&utm_campaign=index&utm_content=original' },
+            { id: 'kanal', name: 'Kanal Projesi', price: 15000000000, img: 'https://www.herbiremlak.com/images/haberler/2025/04/kanal-istanbul-manzarali-12-bin-344-konutun-ihalesi-sonuclandi-iste-ihaleyi-kazanan-firmalar-4272.jpg' },
+            { id: 'twitter', name: 'Sosyal Medya Uygulamaları', price: 44000000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-rTiQrRmrksFRXIeA9-fyvSQADc_5yCvzBVk68VBNQ8gyXC6Q1OdTcAkj&s=10' },
         ];
+
 
         function App() {
             const [cart, setCart] = useState({});
