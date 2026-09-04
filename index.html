@@ -1,384 +1,374 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Receipt, X, Trash2, ArrowRight } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>128 Milyarı Harca</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .receipt-pattern {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased selection:bg-emerald-500 selection:text-white">
+    <div id="root"></div>
 
-// Başlangıç bütçesi: 128 Milyar Dolar
-const INITIAL_BUDGET = 128000000000;
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-// Satın alınabilecek ürünler listesi (Küçükten büyüğe)
-const ITEMS = [
-  { id: 'simit', name: 'Simit', price: 1, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=60' },
-  { id: 'cay', name: 'Çay', price: 1, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=60' },
-  { id: 'netflix', name: 'Netflix Aboneliği (1 Yıl)', price: 120, img: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=500&q=60' },
-  { id: 'ayakkabi', name: 'Lüks Spor Ayakkabı', price: 250, img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=60' },
-  { id: 'telefon', name: 'Son Model Akıllı Telefon', price: 1500, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/iphone-18-pro-nun-yeni-renk-secenekleri-belli-oldu-apple-dan-yillar-sonra-bir-ilk-1771932803-76_small.jpg' },
-  { id: 'bilgisayar', name: 'Üst Düzey Oyun Bilgisayarı', price: 4000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/images.jpg' },
-  { id: 'rolex', name: 'Rolex Saat', price: 15000, img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=500&q=60' },
-  { id: 'togg', name: 'TOGG', price: 60000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/togg-t10x.jpg' },
-  { id: 'zırhlı', name: 'Mercedes-Maybach S-Serisi', price: 240000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/1400x1050yeni-mercedes-maybach-s-serisi-tanitildi-daha-luks-ve-teknolojik.jpg' },
-  { id: 'rezidans', name: 'Boğaz Manzaralı Rezidans', price: 2500000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/830bc336-95d8-45f7-b617-34f452c16d2b.jpg' },
-  { id: 'helikopter', name: 'Özel Helikopter', price: 5000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/is-dunyasinda-ozel-helikoptere-talep-iki-kat-artti-1634719140.jpg' },
-  { id: 'yat', name: 'Mega Lüks Yat', price: 25000000, img: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=500&q=60' },
-  { id: 'jet', name: 'Özel Jet', price: 65000000, img: 'https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=500&q=60' },
-  { id: 'fotuzbes', name: 'F-35', price: 100000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/F35-LMA-800.jpg' },
-  { id: 'yolcuucagi', name: 'Yolcu Uçağı', price: 350000000, img: 'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=500&q=60' },
-  { id: 'Gökdelen', name: 'Gökdelen', price: 1000000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/architecture-buildings-business-city-358502.jpg' },
-  { id: 'saray', name: 'Devlet Sarayı', price: 1500000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/1574323238212-kulliye.jpg' },
-  { id: 'futbol', name: 'Büyük Futbol Kulübü', price: 2000000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/rams-park.jpg' },
-  { id: 'tupras', name: 'Tüpraş', price: 7500000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/tupras-aa-1900926.jpg' },
-  { id: 'kanal', name: 'Kanal Projesi', price: 15000000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/kanal-istanbulun-yarattigi-yeni-cazibe-merkezleri-4.jpg' },
-  { id: 'twitter', name: 'Sosyal Medya Uygulamaları', price: 44000000000, img: 'https://6a9ad0ccd601bb7bf57ca720.imgix.net/sandbox/images%20(1).jpg' },
-];
+        const INITIAL_BUDGET = 128000000000;
 
-// Animasyonlu sayı bileşeni
-const AnimatedNumber = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState(value);
+        const ITEMS = [
+            { id: 'simit', name: 'Simit', price: 1, img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=500&q=60' },
+            { id: 'cay', name: 'Çay', price: 1, img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=500&q=60' },
+            { id: 'netflix', name: 'Netflix Aboneliği (1 Yıl)', price: 120, img: 'https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?auto=format&fit=crop&w=500&q=60' },
+            { id: 'ayakkabi', name: 'Lüks Spor Ayakkabı', price: 250, img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=60' },
+            { id: 'telefon', name: 'Son Model Akıllı Telefon', price: 1500, img: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=60' },
+            { id: 'bilgisayar', name: 'Üst Düzey Oyun Bilgisayarı', price: 4000, img: 'https://www.evimitasarla.net/ev-dekorasyon-fikirleri-blog/wp-content/uploads/2023/12/image-5.png' },
+            { id: 'rolex', name: 'Rolex Saat', price: 15000, img: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=500&q=60' },
+            { id: 'togg', name: 'TOGG', price: 60000, img: 'https://cdn.motor1.com/images/mgl/kolmBN/s1/togg-t10x-yeni-renk-secenegi.webp' },
+            { id: 'zırhlı', name: 'Mercedes-Maybach S-Serisi', price: 240000, img: 'https://cdn.motor1.com/images/mgl/WLAV3/s1/2019-mercedes-maybach-s-class-sedan.webp' },
+            { id: 'rezidans', name: 'Boğaz Manzaralı Rezidans', price: 2500000, img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=500&q=60' },
+            { id: 'helikopter', name: 'Özel Helikopter', price: 5000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVy3pIpXG61pTYXOgSg9YF82095MlR_hWoiH1lEfigvNRNQ5zoFuOM90s&s=10' },
+            { id: 'yat', name: 'Mega Lüks Yat', price: 25000000, img: 'https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=500&q=60' },
+            { id: 'jet', name: 'Özel Jet', price: 65000000, img: 'https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=500&q=60' },
+            { id: 'fotuzbes', name: 'F-35', price: 100000000, img: 'https://www.savunmatr.com/wp-content/uploads/2024/07/F35-LMA-800.jpg' },
+            { id: 'yolcuucagi', name: 'Yolcu Uçağı', price: 350000000, img: 'https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=500&q=60' },
+            { id: 'Gökdelen', name: 'Gökdelen', price: 1000000000, img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=500&q=60' },
+            { id: 'saray', name: 'Devlet Sarayı', price: 1500000000, img: 'https://static.bianet.org/system/uploads/1/articles/spot_image/000/229/576/original/1574323238212-kulliye.jpg' },
+            { id: 'futbol', name: 'Büyük Futbol Kulübü', price: 2000000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2FuPhJ34emDBkwveM-aRqaFJB9n8IRHs0pW96urGZcDCsUdt617CCAgI&s=10' },
+            { id: 'tupras', name: 'Tüpraş', price: 7500000000, img: 'https://upload.wikimedia.org/wikipedia/commons/1/12/Tupras_%C4%B0zmit_Refinery.jpg?utm_source=tr.wikipedia.org&utm_campaign=index&utm_content=original' },
+            { id: 'kanal', name: 'Kanal Projesi', price: 15000000000, img: 'https://www.herbiremlak.com/images/haberler/2025/04/kanal-istanbul-manzarali-12-bin-344-konutun-ihalesi-sonuclandi-iste-ihaleyi-kazanan-firmalar-4272.jpg' },
+            { id: 'twitter', name: 'Sosyal Medya Uygulamaları', price: 44000000000, img: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-rTiQrRmrksFRXIeA9-fyvSQADc_5yCvzBVk68VBNQ8gyXC6Q1OdTcAkj&s=10' },
+        ];
 
-  useEffect(() => {
-    let start = displayValue;
-    const end = value;
-    if (start === end) return;
+        const AnimatedNumber = ({ value }) => {
+            const [displayValue, setDisplayValue] = useState(value);
 
-    const duration = 800; // ms
-    let startTime = null;
+            useEffect(() => {
+                let start = displayValue;
+                const end = value;
+                if (start === end) return;
 
-    const animate = (currentTime) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      
-      // Easing function for smoother animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const current = Math.floor(start + (end - start) * easeOutQuart);
-      
-      setDisplayValue(current);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setDisplayValue(end);
-      }
-    };
-    
-    requestAnimationFrame(animate);
-  }, [value]);
+                const duration = 800;
+                let startTime = null;
 
-  return <span>${displayValue.toLocaleString('tr-TR')}</span>;
-};
+                const animate = (currentTime) => {
+                    if (!startTime) startTime = currentTime;
+                    const progress = Math.min((currentTime - startTime) / duration, 1);
+                    const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                    const current = Math.floor(start + (end - start) * easeOutQuart);
+                    setDisplayValue(current);
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        setDisplayValue(end);
+                    }
+                };
+                requestAnimationFrame(animate);
+            }, [value]);
 
-export default function App() {
-  const [cart, setCart] = useState({});
-  const [showReceipt, setShowReceipt] = useState(false);
+            return <span>${displayValue.toLocaleString('tr-TR')}</span>;
+        };
 
-  // Toplam harcama ve kalan bütçe hesaplamaları
-  const totalSpent = useMemo(() => {
-    return Object.entries(cart).reduce((total, [itemId, quantity]) => {
-      const item = ITEMS.find(i => i.id === itemId);
-      return total + (item ? item.price * quantity : 0);
-    }, 0);
-  }, [cart]);
+        function App() {
+            const [cart, setCart] = useState({});
+            const [showReceipt, setShowReceipt] = useState(false);
 
-  const balance = INITIAL_BUDGET - totalSpent;
+            const totalSpent = useMemo(() => {
+                return Object.entries(cart).reduce((total, [itemId, quantity]) => {
+                    const item = ITEMS.find(i => i.id === itemId);
+                    return total + (item ? item.price * quantity : 0);
+                }, 0);
+            }, [cart]);
 
-  // Sepet İşlemleri
-  const handleBuy = (item, amount = 1) => {
-    const cost = item.price * amount;
-    if (balance >= cost) {
-      setCart(prev => ({
-        ...prev,
-        [item.id]: (prev[item.id] || 0) + amount
-      }));
-    }
-  };
+            const balance = INITIAL_BUDGET - totalSpent;
 
-  const handleSell = (item, amount = 1) => {
-    if (cart[item.id] && cart[item.id] >= amount) {
-      setCart(prev => {
-        const newCart = { ...prev };
-        newCart[item.id] -= amount;
-        if (newCart[item.id] === 0) delete newCart[item.id];
-        return newCart;
-      });
-    }
-  };
+            const handleBuy = (item, amount = 1) => {
+                const cost = item.price * amount;
+                if (balance >= cost) {
+                    setCart(prev => ({
+                        ...prev,
+                        [item.id]: (prev[item.id] || 0) + amount
+                    }));
+                }
+            };
 
-  const handleInputChange = (item, value) => {
-    let newQuantity = parseInt(value, 10);
-    if (isNaN(newQuantity) || newQuantity < 0) newQuantity = 0;
+            const handleSell = (item, amount = 1) => {
+                if (cart[item.id] && cart[item.id] >= amount) {
+                    setCart(prev => {
+                        const newCart = { ...prev };
+                        newCart[item.id] -= amount;
+                        if (newCart[item.id] === 0) delete newCart[item.id];
+                        return newCart;
+                    });
+                }
+            };
 
-    const currentQuantity = cart[item.id] || 0;
-    const maxAffordable = Math.floor(balance / item.price) + currentQuantity;
+            const handleInputChange = (item, value) => {
+                let newQuantity = parseInt(value, 10);
+                if (isNaN(newQuantity) || newQuantity < 0) newQuantity = 0;
 
-    if (newQuantity > maxAffordable) {
-      newQuantity = maxAffordable;
-    }
+                const currentQuantity = cart[item.id] || 0;
+                const maxAffordable = Math.floor(balance / item.price) + currentQuantity;
 
-    setCart(prev => {
-      const newCart = { ...prev };
-      if (newQuantity === 0) {
-        delete newCart[item.id];
-      } else {
-        newCart[item.id] = newQuantity;
-      }
-      return newCart;
-    });
-  };
+                if (newQuantity > maxAffordable) {
+                    newQuantity = maxAffordable;
+                }
 
-  const clearCart = () => {
-    if(confirm("Tüm harcamaları sıfırlamak istediğinize emin misiniz?")) {
-      setCart({});
-      setShowReceipt(false);
-    }
-  };
+                setCart(prev => {
+                    const newCart = { ...prev };
+                    if (newQuantity === 0) {
+                        delete newCart[item.id];
+                    } else {
+                        newCart[item.id] = newQuantity;
+                    }
+                    return newCart;
+                });
+            };
 
-  // Sepetteki toplam ürün sayısı
-  const totalItemsCount = Object.values(cart).reduce((a, b) => a + b, 0);
+            const clearCart = () => {
+                setCart({});
+                setShowReceipt(false);
+            };
 
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24">
-      {/* Header / Hero Bölümü */}
-      <header className="bg-white shadow-sm pt-8 pb-6 text-center px-4">
-        <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-2">
-          Erdoğan Gibi Harca
-        </h1>
-        <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
-          $128.000.000.000'ı (128 Milyar Dolar) bitirebilir misin? Hayalindeki her şeyi satın al, parayı sıfırlamaya çalış!
-        </p>
-      </header>
-
-      {/* Yapışkan Bütçe Çubuğu (Sticky Balance Bar) */}
-      <div className="sticky top-0 z-40 bg-emerald-600 shadow-lg transition-colors duration-500">
-        <div className="container mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-emerald-100 font-semibold text-lg uppercase tracking-wider mb-1 md:mb-0">
-            Kalan Bütçe
-          </div>
-          <div className="text-3xl md:text-5xl font-bold text-white tabular-nums tracking-tight">
-            <AnimatedNumber value={balance} />
-          </div>
-        </div>
-        {/* İlerleme çubuğu (Progress bar) */}
-        <div className="h-1.5 w-full bg-emerald-800">
-          <div 
-            className="h-full bg-yellow-400 transition-all duration-700 ease-out" 
-            style={{ width: `${(totalSpent / INITIAL_BUDGET) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Ürünler Grid (Item Grid) */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {ITEMS.map((item) => {
-            const quantity = cart[item.id] || 0;
-            const canAfford = balance >= item.price;
+            const totalItemsCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
             return (
-              <div key={item.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-100 overflow-hidden flex flex-col">
-                <div className="h-48 w-full overflow-hidden bg-slate-100 relative">
-                  <img 
-                    src={item.img} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-slate-800 shadow-sm">
-                    ${item.price.toLocaleString('tr-TR')}
-                  </div>
-                </div>
-                
-                <div className="p-5 flex-grow flex flex-col">
-                  <h3 className="font-bold text-lg text-slate-800 mb-4 line-clamp-2">{item.name}</h3>
-                  
-                  <div className="mt-auto flex items-center justify-between gap-2">
-                    <button 
-                      onClick={() => handleSell(item)}
-                      disabled={quantity === 0}
-                      className={`flex-1 py-2.5 rounded-lg font-bold transition-colors ${
-                        quantity > 0 
-                          ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                      }`}
-                    >
-                      Sat
-                    </button>
-                    
-                    <input 
-                      type="number" 
-                      value={quantity}
-                      onChange={(e) => handleInputChange(item, e.target.value)}
-                      className="w-20 text-center border-2 border-slate-200 rounded-lg py-2 font-semibold text-slate-700 focus:outline-none focus:border-emerald-500 appearance-none"
-                    />
-                    
-                    <button 
-                      onClick={() => handleBuy(item)}
-                      disabled={!canAfford}
-                      className={`flex-1 py-2.5 rounded-lg font-bold transition-colors ${
-                        canAfford 
-                          ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm shadow-emerald-200' 
-                          : 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                      }`}
-                    >
-                      Al
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </main>
+                <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-28">
+                    {/* Header */}
+                    <header className="bg-white shadow-sm pt-8 pb-6 text-center px-4">
+                        <h1 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-2">
+                            128 MİLYARI HARCA
+                        </h1>
+                        <p className="text-slate-500 text-sm md:text-base max-w-xl mx-auto">
+                            $128.000.000.000'ı (128 Milyar Dolar) bitirebilir misin? Hayalindeki her şeyi satın al, parayı sıfırlamaya çalış!
+                        </p>
+                    </header>
 
-      {/* Sabit Alt Çubuk / Alışverişi Tamamla Butonu */}
-      {totalItemsCount > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 z-40 animate-slide-up">
-          <div className="container mx-auto max-w-4xl flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <ShoppingCart className="w-8 h-8 text-slate-700" />
-                <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {totalItemsCount > 99 ? '99+' : totalItemsCount}
-                </span>
-              </div>
-              <div className="hidden sm:block">
-                <p className="text-xs text-slate-500 font-semibold uppercase">Toplam Harcanan</p>
-                <p className="text-xl font-bold text-slate-800">${totalSpent.toLocaleString('tr-TR')}</p>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => setShowReceipt(true)}
-              className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg"
-            >
-              <Receipt className="w-5 h-5" />
-              <span>Alışverişi Tamamla</span>
-              <ArrowRight className="w-5 h-5 ml-1 hidden sm:block" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Fiş (Receipt) Modalı */}
-      {showReceipt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            
-            {/* Modal Header */}
-            <div className="bg-slate-800 p-4 flex items-center justify-between text-white shrink-0">
-              <h2 className="font-bold text-lg flex items-center gap-2">
-                <Receipt className="w-5 h-5" />
-                Alışveriş Fişiniz
-              </h2>
-              <button 
-                onClick={() => setShowReceipt(false)}
-                className="p-1 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Receipt Content - Fiş Tasarımı */}
-            <div className="p-6 overflow-y-auto bg-[#fdfbf7] font-mono text-sm relative receipt-pattern flex-grow">
-              <div className="text-center mb-6 border-b-2 border-dashed border-slate-300 pb-4">
-                <h3 className="font-bold text-xl uppercase tracking-widest text-slate-800">T.C. KASASI</h3>
-                <p className="text-slate-500 text-xs mt-1">TEŞEKKÜR EDERİZ</p>
-                <p className="text-slate-500 text-xs mt-1">Tarih: {new Date().toLocaleDateString('tr-TR')}</p>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between font-bold text-xs border-b border-slate-200 pb-2">
-                  <span>ÜRÜN (ADET)</span>
-                  <span>TUTAR</span>
-                </div>
-                
-                {Object.entries(cart).map(([itemId, quantity]) => {
-                  const item = ITEMS.find(i => i.id === itemId);
-                  if (!item) return null;
-                  return (
-                    <div key={itemId} className="flex justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <span className="text-slate-800 break-words">{item.name}</span>
-                        <div className="text-slate-500 text-xs">
-                          {quantity.toLocaleString('tr-TR')} x ${item.price.toLocaleString('tr-TR')}
+                    {/* Sticky Balance Bar */}
+                    <div className="sticky top-0 z-40 bg-emerald-600 shadow-lg transition-colors duration-500">
+                        <div className="container mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row justify-between items-center">
+                            <div className="text-emerald-100 font-semibold text-lg uppercase tracking-wider mb-1 md:mb-0">
+                                Kalan Bütçe
+                            </div>
+                            <div className="text-3xl md:text-5xl font-bold text-white tabular-nums tracking-tight">
+                                <AnimatedNumber value={balance} />
+                            </div>
                         </div>
-                      </div>
-                      <div className="font-semibold text-slate-800 text-right">
-                        ${(item.price * quantity).toLocaleString('tr-TR')}
-                      </div>
+                        <div className="h-1.5 w-full bg-emerald-800">
+                            <div 
+                                className="h-full bg-yellow-400 transition-all duration-700 ease-out" 
+                                style={{ width: `${(totalSpent / INITIAL_BUDGET) * 100}%` }}
+                            />
+                        </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              <div className="border-t-2 border-dashed border-slate-300 pt-4 mb-6">
-                <div className="flex justify-between items-center mb-2 text-slate-600">
-                  <span>BAŞLANGIÇ:</span>
-                  <span>${INITIAL_BUDGET.toLocaleString('tr-TR')}</span>
+                    {/* Items Grid */}
+                    <main className="container mx-auto px-4 py-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {ITEMS.map((item) => {
+                                const quantity = cart[item.id] || 0;
+                                const canAfford = balance >= item.price;
+
+                                return (
+                                    <div key={item.id} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow border border-slate-100 overflow-hidden flex flex-col">
+                                        <div className="h-48 w-full overflow-hidden bg-slate-100 relative">
+                                            <img 
+                                                src={item.img} 
+                                                alt={item.name} 
+                                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                                                loading="lazy"
+                                                onError={(e)=>{e.target.onerror=null; e.target.src='https://placehold.co/500x300/e2e8f0/475569?text=Gorsel';}}
+                                            />
+                                            <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-slate-800 shadow-sm">
+                                                ${item.price.toLocaleString('tr-TR')}
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="p-5 flex-grow flex flex-col">
+                                            <h3 className="font-bold text-lg text-slate-800 mb-4 line-clamp-2">{item.name}</h3>
+                                            
+                                            <div className="mt-auto flex items-center justify-between gap-2">
+                                                <button 
+                                                    onClick={() => handleSell(item)}
+                                                    disabled={quantity === 0}
+                                                    className={`flex-1 py-2.5 rounded-lg font-bold transition-colors ${
+                                                        quantity > 0 
+                                                            ? 'bg-red-100 text-red-600 hover:bg-red-200 cursor-pointer' 
+                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    }`}
+                                                >
+                                                    Sat
+                                                </button>
+                                                
+                                                <input 
+                                                    type="number" 
+                                                    value={quantity}
+                                                    onChange={(e) => handleInputChange(item, e.target.value)}
+                                                    className="w-20 text-center border-2 border-slate-200 rounded-lg py-2 font-semibold text-slate-700 focus:outline-none focus:border-emerald-500"
+                                                />
+                                                
+                                                <button 
+                                                    onClick={() => handleBuy(item)}
+                                                    disabled={!canAfford}
+                                                    className={`flex-1 py-2.5 rounded-lg font-bold transition-colors ${
+                                                        canAfford 
+                                                            ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-sm shadow-emerald-200 cursor-pointer' 
+                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    }`}
+                                                >
+                                                    Al
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </main>
+
+                    {/* Fixed Bottom Cart Bar */}
+                    {totalItemsCount > 0 && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] p-4 z-40 animate-slide-up">
+                            <div className="container mx-auto max-w-4xl flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <svg className="w-8 h-8 text-slate-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                        <span className="absolute -top-2 -right-2 bg-emerald-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                            {totalItemsCount > 99 ? '99+' : totalItemsCount}
+                                        </span>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <p className="text-xs text-slate-500 font-semibold uppercase">Toplam Harcanan</p>
+                                        <p className="text-xl font-bold text-slate-800">${totalSpent.toLocaleString('tr-TR')}</p>
+                                    </div>
+                                </div>
+                                
+                                <button 
+                                    onClick={() => setShowReceipt(true)}
+                                    className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg cursor-pointer"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                                    <span>Alışverişi Tamamla</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Receipt Modal */}
+                    {showReceipt && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                                <div className="bg-slate-800 p-4 flex items-center justify-between text-white shrink-0">
+                                    <h2 className="font-bold text-lg flex items-center gap-2">
+                                        Alışveriş Fişiniz
+                                    </h2>
+                                    <button 
+                                        onClick={() => setShowReceipt(false)}
+                                        className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </button>
+                                </div>
+
+                                <div className="p-6 overflow-y-auto bg-[#fdfbf7] font-mono text-sm relative receipt-pattern flex-grow">
+                                    <div className="text-center mb-6 border-b-2 border-dashed border-slate-300 pb-4">
+                                        <h3 className="font-bold text-xl uppercase tracking-widest text-slate-800">T.C. KASASI</h3>
+                                        <p className="text-slate-500 text-xs mt-1">TEŞEKKÜR EDERİZ</p>
+                                        <p className="text-slate-500 text-xs mt-1">Tarih: {new Date().toLocaleDateString('tr-TR')}</p>
+                                    </div>
+
+                                    <div className="space-y-3 mb-6">
+                                        <div className="flex justify-between font-bold text-xs border-b border-slate-200 pb-2">
+                                            <span>ÜRÜN (ADET)</span>
+                                            <span>TUTAR</span>
+                                        </div>
+                                        
+                                        {Object.entries(cart).map(([itemId, quantity]) => {
+                                            const item = ITEMS.find(i => i.id === itemId);
+                                            if (!item) return null;
+                                            return (
+                                                <div key={itemId} className="flex justify-between items-start gap-4">
+                                                    <div className="flex-1">
+                                                        <span className="text-slate-800 break-words">{item.name}</span>
+                                                        <div className="text-slate-500 text-xs">
+                                                            {quantity.toLocaleString('tr-TR')} x ${item.price.toLocaleString('tr-TR')}
+                                                        </div>
+                                                    </div>
+                                                    <div className="font-semibold text-slate-800 text-right">
+                                                        ${(item.price * quantity).toLocaleString('tr-TR')}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="border-t-2 border-dashed border-slate-300 pt-4 mb-6">
+                                        <div className="flex justify-between items-center mb-2 text-slate-600">
+                                            <span>BAŞLANGIÇ:</span>
+                                            <span>${INITIAL_BUDGET.toLocaleString('tr-TR')}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center mb-2 text-slate-600">
+                                            <span>TOPLAM HARCANAN:</span>
+                                            <span className="text-red-500">-${totalSpent.toLocaleString('tr-TR')}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center font-bold text-lg text-slate-800 mt-4 border-t border-slate-200 pt-2">
+                                            <span>KALAN BAKİYE:</span>
+                                            <span className="text-emerald-600">${balance.toLocaleString('tr-TR')}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-center">
+                                        {balance === 0 ? (
+                                            <p className="font-bold text-emerald-600 text-lg uppercase animate-pulse">
+                                                Tebrikler, parayı sıfırladınız!
+                                            </p>
+                                        ) : (
+                                            <p className="text-slate-500 text-xs italic">
+                                                Hala harcayacak çok paranız var...
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3 shrink-0">
+                                    <button 
+                                        onClick={clearCart}
+                                        className="flex-1 py-3 px-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                    >
+                                        Sıfırla
+                                    </button>
+                                    <button 
+                                        onClick={() => setShowReceipt(false)}
+                                        className="flex-1 py-3 px-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                                    >
+                                        Kapat
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
-                <div className="flex justify-between items-center mb-2 text-slate-600">
-                  <span>TOPLAM HARCANAN:</span>
-                  <span className="text-red-500">-${totalSpent.toLocaleString('tr-TR')}</span>
-                </div>
-                <div className="flex justify-between items-center font-bold text-lg text-slate-800 mt-4 border-t border-slate-200 pt-2">
-                  <span>KALAN BAKİYE:</span>
-                  <span className="text-emerald-600">${balance.toLocaleString('tr-TR')}</span>
-                </div>
-              </div>
+            );
+        }
 
-              <div className="text-center">
-                {balance === 0 ? (
-                  <p className="font-bold text-emerald-600 text-lg uppercase animate-pulse">
-                    Tebrikler, parayı sıfırladınız!
-                  </p>
-                ) : (
-                  <p className="text-slate-500 text-xs italic">
-                    Hala harcayacak çok paranız var...
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-200 flex gap-3 shrink-0">
-               <button 
-                onClick={clearCart}
-                className="flex-1 py-3 px-4 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition-colors flex items-center justify-center gap-2"
-              >
-                <Trash2 className="w-5 h-5" />
-                Sıfırla
-              </button>
-              <button 
-                onClick={() => setShowReceipt(false)}
-                className="flex-1 py-3 px-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors"
-              >
-                Kapat
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes slide-up {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .receipt-pattern {
-          background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
-          background-size: 20px 20px;
-        }
-        /* Chrome, Safari, Edge, Opera numara input oklarını gizleme */
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-        /* Firefox numara input oklarını gizleme */
-        input[type=number] {
-          -moz-appearance: textfield;
-        }
-      `}} />
-    </div>
-  );
-}
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
